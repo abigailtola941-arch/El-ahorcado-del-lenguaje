@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aprender Jugando</title>
+<style>
+:root{--bg1:#a1e3ff;--bg2:#d9b8ff;--card:#fffdf7;--ink:#2b2a4c;--slot:#eef3ff;--accent:#6c5ce7;--good:#00b894;--bad:#e17055;--sun:#fdcb6e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1f2a5e;--bg2:#4a2a6e;--card:#26244a;--ink:#fdf6e3;--slot:#34316b}}
+:root[data-theme="dark"]{--bg1:#1f2a5e;--bg2:#4a2a6e;--card:#26244a;--ink:#fdf6e3;--slot:#34316b}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Baloo 2","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;display:flex;justify-content:center;padding:12px;overflow-x:hidden}
+#app{width:100%;max-width:720px;position:relative}
+.card{background:var(--card);border-radius:28px;padding:20px;box-shadow:0 8px 0 rgba(0,0,0,.15);text-align:center}
+.hide{display:none!important}
+h1{font-size:clamp(30px,8vw,52px);margin:4px 0;color:var(--accent);line-height:1.05}
+.chars{font-size:clamp(48px,14vw,72px)}
+.chars span,.mascot{display:inline-block;animation:bob 1.8s ease-in-out infinite}
+.chars span:nth-child(2){animation-delay:.3s}.chars span:nth-child(3){animation-delay:.6s}
+@keyframes bob{50%{transform:translateY(-12px) rotate(5deg)}}
+.btn{font:inherit;font-size:22px;font-weight:800;border:0;border-radius:999px;padding:12px 26px;color:#fff;background:var(--accent);cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.25);margin:6px}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.lv{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.lv .btn{width:100%;margin:0;font-size:24px}
+.easy{background:#00b894}.mid{background:#f39c12}.hard{background:#e84393}
+.snd{position:absolute;top:8px;right:8px;z-index:5;font-size:26px;border:0;border-radius:50%;width:48px;height:48px;background:var(--card);cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;font-size:19px;flex-wrap:wrap;padding-right:44px}
+.pill{background:var(--slot);border-radius:999px;padding:4px 14px}
+.bar{height:12px;background:var(--slot);border-radius:99px;margin:10px 0;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--good);transition:width .4s}
+.subj{display:inline-block;color:#fff;border-radius:999px;padding:4px 16px;font-weight:800;font-size:18px}
+.row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.mascot{font-size:64px;flex:none}
+.bubble{flex:1;background:var(--slot);border-radius:20px;padding:12px 16px;font-size:clamp(18px,4.6vw,24px);font-weight:700;text-align:left}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+@media (max-width:420px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;font-size:clamp(18px,4.5vw,24px);font-weight:800;min-height:64px;border:0;border-radius:18px;background:var(--sun);color:#3b2f00;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.22);padding:8px 12px}
+.opt:active{transform:translateY(3px)}
+.opt.ok{background:var(--good);color:#fff}
+.opt.no{background:var(--bad);color:#fff;opacity:.65}
+.opt:disabled{cursor:default}
+.fb{min-height:60px;margin-top:10px;font-size:clamp(18px,4.5vw,22px);font-weight:800;border-radius:16px;padding:10px 14px}
+.fb.g{background:var(--good);color:#fff}.fb.h{background:#ffeaa7;color:#5a4300}
+.shake{animation:sh .4s}.pop{animation:pop .5s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pop{40%{transform:scale(1.3) rotate(-8deg)}}
+.stars{font-size:64px;letter-spacing:6px}
+.score{font-size:44px;font-weight:800;color:var(--accent)}
+.fly{position:fixed;top:-40px;font-size:30px;pointer-events:none;animation:fall 2s linear forwards;z-index:9}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.chars span,.mascot{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+<button class="snd" id="snd" aria-label="Sonido">🔊</button>
+
+<section id="s-start" class="card">
+  <div class="chars"><span>🤖</span><span>🦉</span><span>🐸</span></div>
+  <h1>Aprender Jugando</h1>
+  <p style="font-size:20px;margin:6px">Matemáticas ➕ Lenguaje 📚 Ciencias 🔬</p>
+  <p style="font-size:19px;margin:6px">Toca la respuesta correcta y gana puntos. ¡Si te equivocas, te daremos una pista!</p>
+  <div class="lv">
+    <button class="btn easy" data-lv="0">🌱 Nivel Fácil</button>
+    <button class="btn mid" data-lv="1">🔥 Nivel Medio</button>
+    <button class="btn hard" data-lv="2">🚀 Nivel Difícil</button>
+  </div>
+</section>
+
+<section id="s-game" class="card hide">
+  <div class="top"><span class="pill" id="lvname"></span><span class="pill" id="qn"></span><span class="pill" id="pts"></span></div>
+  <div class="bar"><i id="prog"></i></div>
+  <span class="subj" id="subj"></span>
+  <div class="row"><div class="mascot" id="mas">🤖</div><div class="bubble" id="q"></div></div>
+  <div class="opts" id="opts"></div>
+  <div class="fb hide" id="fb"></div>
+  <button class="btn hide" id="next">Siguiente ➜</button>
+</section>
+
+<section id="s-end" class="card hide">
+  <div class="stars" id="stars"></div>
+  <h1 id="endt">¡Felicidades!</h1>
+  <p style="font-size:22px;margin:4px" id="endm"></p>
+  <div class="score" id="fin"></div>
+  <button class="btn" id="again">🔄 Jugar este nivel</button>
+  <button class="btn mid" id="menu">🏠 Elegir otro nivel</button>
+</section>
+</div>
+
+<script>
+const LV=["Fácil","Medio","Difícil"];
+const SUB={m:{n:"➕ Matemáticas",c:"#e17055",e:"🤖"},l:{n:"📚 Lenguaje",c:"#6c5ce7",e:"🦉"},c:{n:"🔬 Ciencias Naturales",c:"#00a381",e:"🐸"}};
+// [materia, pregunta, opciones, índice correcto, pista]
+const Q=[[
+["m","¿Cuánto es 5 + 4?",["7","8","9","10"],2,"Empieza en el 5 y cuenta 4 más con los dedos."],
+["l","¿Cuál es el antónimo de “grande”?",["pequeño","alto","largo","gordo"],0,"Piensa en lo contrario de grande."],
+["c","¿Qué necesitan las plantas para vivir?",["Solo helado","Agua y luz","Televisión","Arena seca"],1,"Las riegas y les gusta el sol."],
+["m","¿Cuánto es 10 − 3?",["6","8","5","7"],3,"Cuenta hacia atrás 3 números desde el 10."],
+["l","¿Cuál palabra es un verbo (una acción)?",["casa","rojo","saltar","flor"],2,"Un verbo es algo que se puede hacer."],
+["c","¿En qué planeta vivimos?",["Marte","Tierra","Venus","Júpiter"],1,"Es el planeta azul donde estás ahora."],
+["m","¿Cuántos lados tiene un triángulo?",["2","3","4","5"],1,"“Tri” significa tres."],
+["l","¿Cuál palabra nombra un animal?",["mesa","lápiz","perro","silla"],2,"Camina, ladra y es una mascota muy fiel."],
+["c","¿Qué animal vive en el agua?",["Gato","Vaca","Gallina","Pez"],3,"Nada con sus aletas."]
+],[
+["m","¿Cuánto es 7 × 6?",["36","42","48","40"],1,"Suma 6 siete veces: 6, 12, 18, 24…"],
+["l","¿Cuál palabra está bien escrita?",["bentana","vemtana","ventana","ventaná"],2,"Se escribe con V, como en “viento”."],
+["c","¿Qué gas respiramos para vivir?",["Helio","Oxígeno","Hierro","Humo"],1,"Las plantas lo producen."],
+["m","Ana tiene 25 caramelos y regala 8. ¿Cuántos le quedan?",["15","18","17","19"],2,"Es una resta: 25 − 8."],
+["l","¿Cuál es un sinónimo de “contento”?",["triste","enojado","cansado","feliz"],3,"Sinónimo es una palabra con significado parecido."],
+["c","¿Cuál animal es vertebrado (tiene huesos)?",["Caracol","Lombriz","Pájaro","Medusa"],2,"Los vertebrados tienen columna vertebral."],
+["m","¿Cuánto es 84 ÷ 4?",["21","22","24","18"],0,"4 × 20 = 80, y faltan 4 más."],
+["l","En “La niña corre rápido”, ¿cuál es el sustantivo?",["corre","niña","rápido","La"],1,"El sustantivo nombra personas, animales o cosas."],
+["c","El hielo es agua en estado…",["líquido","gaseoso","sólido","invisible"],2,"El hielo es duro y mantiene su forma."]
+],[
+["m","¿Cuánto es 3/4 de 20?",["5","10","12","15"],3,"Divide 20 entre 4 y multiplica por 3."],
+["l","¿Cuál oración usa bien las mayúsculas?",["Mi amiga se llama Sofía.","mi amiga se llama sofía.","Mi Amiga se llama sofía.","mi amiga Se Llama Sofía."],0,"Mayúscula al empezar y en los nombres propios."],
+["c","¿Cómo se llama el proceso con el que las plantas fabrican su alimento?",["Digestión","Fotosíntesis","Evaporación","Respiración"],1,"“Foto” significa luz."],
+["m","¿Cuál es el perímetro de un cuadrado de lado 6 cm?",["12 cm","36 cm","24 cm","18 cm"],2,"Suma sus 4 lados: 6 + 6 + 6 + 6."],
+["l","¿Cuál es el antónimo de “valiente”?",["Fuerte","Audaz","Veloz","Cobarde"],3,"Es quien siente mucho miedo."],
+["c","¿Qué órgano bombea la sangre por el cuerpo?",["Pulmón","Corazón","Estómago","Riñón"],1,"Late: pum-pum, pum-pum."],
+["m","¿Cuánto es 125 + 378?",["493","513","403","503"],3,"Suma por columnas: 5 + 8 = 13, escribe 3 y llevas 1."],
+["l","En “una estrella brillante”, ¿qué tipo de palabra es “brillante”?",["Verbo","Adjetivo","Sustantivo","Pronombre"],1,"Dice cómo es la estrella."],
+["c","¿Qué planeta es conocido como el planeta rojo?",["Venus","Saturno","Mercurio","Marte"],3,"Su suelo tiene polvo de hierro rojizo."]
+]];
+const GOOD=["¡Muy bien! 🎉","¡Excelente trabajo! 🌟","¡Eres un genio! 🧠","¡Fantástico! 👏","¡Correcto, campeón! 🏆","¡Genial! 🚀"];
+const RETRY=["¡Casi! Sigue intentando 💪","¡Uy! Inténtalo otra vez 🙂","¡Tú puedes! 🌈"];
+const $=id=>document.getElementById(id);
+let lv=0,qs=[],i=0,score=0,errs=0,locked=false,sound=true,AC=null;
+
+function tone(freq,dur,t0,type,vol){
+  if(!sound)return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+t0;
+    o.type=type||"triangle";o.frequency.value=freq;o.connect(g);g.connect(AC.destination);
+    g.gain.setValueAtTime(vol||.18,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+const sfx={
+  ok(){[523,659,784,1047].forEach((f,k)=>tone(f,.18,k*.09))},
+  no(){tone(220,.25,0,"sawtooth",.1);tone(165,.3,.12,"sawtooth",.1)},
+  click(){tone(660,.08,0)},
+  win(){[523,659,784,659,784,1047,1319].forEach((f,k)=>tone(f,.25,k*.13))}
+};
+function show(id){["s-start","s-game","s-end"].forEach(s=>$(s).classList.toggle("hide",s!==id));window.scrollTo(0,0)}
+function shuffle(a){for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function confetti(){
+  const em=["🎉","⭐","🌟","✨","🎈"];
+  for(let k=0;k<14;k++){const s=document.createElement("div");s.className="fly";s.textContent=em[k%em.length];
+    s.style.left=Math.random()*95+"vw";s.style.animationDelay=Math.random()*.5+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),2800)}
+}
+function start(l){
+  lv=l;i=0;score=0;
+  qs=Q[l].map(q=>{const right=q[2][q[3]];return{s:q[0],t:q[1],o:shuffle(q[2].slice()),r:right,h:q[4]}});
+  show("s-game");load();
+}
+function load(){
+  const q=qs[i];errs=0;locked=false;
+  $("lvname").textContent="Nivel "+LV[lv];
+  $("qn").textContent="Pregunta "+(i+1)+" de "+qs.length;
+  $("pts").textContent="⭐ "+score;
+  $("prog").style.width=(i/qs.length*100)+"%";
+  const S=SUB[q.s];
+  $("subj").textContent=S.n;$("subj").style.background=S.c;
+  $("mas").textContent=S.e;$("q").textContent=q.t;
+  const box=$("opts");box.innerHTML="";
+  q.o.forEach(t=>{const b=document.createElement("button");b.className="opt";b.textContent=t;b.onclick=()=>answer(b,t);box.appendChild(b)});
+  $("fb").className="fb hide";$("next").classList.add("hide");
+}
+function answer(b,t){
+  if(locked)return;
+  const q=qs[i],fb=$("fb");
+  if(t===q.r){
+    locked=true;const pts=Math.max(10-errs*3,1);score+=pts;
+    b.classList.add("ok");$("pts").textContent="⭐ "+score;
+    document.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+    fb.className="fb g";fb.textContent=GOOD[Math.floor(Math.random()*GOOD.length)]+"  +"+pts+" puntos";
+    $("mas").classList.remove("pop");void $("mas").offsetWidth;$("mas").classList.add("pop");
+    sfx.ok();confetti();
+    $("next").textContent=i===qs.length-1?"¡Ver mi premio! 🏆":"Siguiente ➜";
+    $("next").classList.remove("hide");
+  }else{
+    errs++;b.classList.add("no");b.disabled=true;sfx.no();
+    fb.className="fb h";
+    fb.textContent=RETRY[Math.floor(Math.random()*RETRY.length)]+"  Pista: "+q.h;
+    $("opts").classList.remove("shake");void $("opts").offsetWidth;$("opts").classList.add("shake");
+  }
+}
+function next(){i++;if(i>=qs.length)return end();load()}
+function end(){
+  const max=qs.length*10,p=score/max;
+  const n=p>=.8?3:p>=.5?2:1;
+  $("stars").textContent="⭐".repeat(n)+"☆".repeat(3-n);
+  $("endt").textContent="¡Felicidades, campeón!";
+  $("endm").textContent=n===3?"¡Eres un experto! Lo hiciste increíble.":n===2?"¡Muy buen trabajo! Sigue practicando para ganar las 3 estrellas.":"¡Buen intento! Con práctica llegarás muy lejos.";
+  $("fin").textContent="Puntaje: "+score+" de "+max;
+  $("prog").style.width="100%";show("s-end");sfx.win();confetti();
+}
+document.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>{sfx.click();start(+b.dataset.lv)});
+$("next").onclick=()=>{sfx.click();next()};
+$("again").onclick=()=>start(lv);
+$("menu").onclick=()=>show("s-start");
+$("snd").onclick=()=>{sound=!sound;$("snd").textContent=sound?"🔊":"🔇";if(sound)sfx.click()};
+</script>
+</body>
+</html>
