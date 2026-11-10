@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El Gran Ahorcado del Lenguaje</title>
+<style>
+:root{--bg1:#ffe29f;--bg2:#ffa99f;--card:#fffdf7;--ink:#2b2a4c;--accent:#6c5ce7;--good:#00b894;--bad:#e17055;--key:#74b9ff;--keyink:#0b2a4a;--slot:#fff3c4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2d2a5e;--bg2:#5b2a6e;--card:#26244a;--ink:#fdf6e3;--slot:#3b3875;--key:#8ab4ff}}
+:root[data-theme="dark"]{--bg1:#2d2a5e;--bg2:#5b2a6e;--card:#26244a;--ink:#fdf6e3;--slot:#3b3875;--key:#8ab4ff}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Baloo 2","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;color:var(--ink);background:linear-gradient(135deg,var(--bg1),var(--bg2)) fixed;display:flex;justify-content:center;padding:12px}
+#app{width:100%;max-width:760px}
+.card{background:var(--card);border-radius:28px;padding:20px;box-shadow:0 8px 0 rgba(0,0,0,.15);text-align:center}
+.hide{display:none!important}
+h1{font-size:clamp(28px,7vw,46px);margin:6px 0;color:var(--accent);line-height:1.1}
+.mascot{font-size:80px;animation:bob 1.6s ease-in-out infinite;display:inline-block}
+@keyframes bob{50%{transform:translateY(-10px) rotate(4deg)}}
+.deco{font-size:28px;letter-spacing:8px}
+.rules{text-align:left;background:var(--slot);border-radius:18px;padding:12px 18px;margin:14px 0;font-size:18px;line-height:1.5}
+.rules p{margin:6px 0}
+.btn{font:inherit;font-size:24px;font-weight:800;border:0;border-radius:999px;padding:14px 34px;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:800;gap:8px;flex-wrap:wrap}
+.hearts{font-size:34px;letter-spacing:4px}
+.pill{background:var(--slot);border-radius:999px;padding:4px 14px}
+.bar{height:12px;background:var(--slot);border-radius:99px;margin:10px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);width:0;transition:width .4s}
+.clue{background:var(--slot);border-radius:18px;padding:12px 16px;font-size:clamp(17px,4.5vw,22px);margin:8px 0}
+.msg{min-height:34px;font-size:24px;font-weight:800;color:var(--accent)}
+.word{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0}
+.word span{width:clamp(30px,8.5vw,52px);height:clamp(42px,11vw,62px);border-bottom:6px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:clamp(26px,7vw,42px);font-weight:800;background:var(--slot);border-radius:10px 10px 0 0}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(48px,1fr));gap:8px;margin-top:8px}
+.keys button{font:inherit;font-size:26px;font-weight:800;min-height:56px;border:0;border-radius:14px;background:var(--key);color:var(--keyink);cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.keys button:active{transform:translateY(3px)}
+.keys button.ok{background:var(--good);color:#fff}
+.keys button.no{background:var(--bad);color:#fff;opacity:.7}
+.keys button:disabled{cursor:default;box-shadow:none}
+.shake{animation:sh .4s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.reveal{font-size:clamp(34px,9vw,56px);font-weight:800;color:var(--good);margin:4px 0}
+.info{text-align:left;background:var(--slot);border-radius:18px;padding:12px 18px;font-size:19px;line-height:1.5;margin:10px 0}
+.info p{margin:5px 0}
+.big{font-size:100px}
+.medal{font-size:110px;animation:bob 1.2s infinite}
+.score{font-size:40px;font-weight:800;color:var(--accent)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="s-start" class="card">
+  <div class="deco">📚 ✏️ 🔤 ⭐</div>
+  <div class="mascot">📖</div>
+  <h1>El Gran Ahorcado del Lenguaje</h1>
+  <p style="font-size:20px;margin:4px">¡Descubre palabras y conviértete en un experto!</p>
+  <div class="rules">
+    <p>🎯 <b>Meta:</b> adivina las 10 palabras ocultas.</p>
+    <p>🔤 Toca las letras para descubrir la palabra. Lee la pista de arriba.</p>
+    <p>❤️ Tienes <b>3 vidas</b> en cada palabra. Si te equivocas, pierdes un corazón.</p>
+    <p>💡 Al terminar cada palabra aprenderás su significado.</p>
+    <p>🏆 Si completas todas, ¡ganas una medalla!</p>
+  </div>
+  <button class="btn" id="b-start">¡Jugar!</button>
+</section>
+
+<section id="s-game" class="card hide">
+  <div class="top">
+    <span class="pill" id="lvl"></span>
+    <span class="hearts" id="hearts" aria-live="polite"></span>
+    <span class="pill" id="pts"></span>
+  </div>
+  <div class="bar"><i id="prog"></i></div>
+  <div><span class="mascot" id="mas" style="font-size:56px">📖</span></div>
+  <div class="clue" id="clue"></div>
+  <div class="msg" id="msg"></div>
+  <div class="word" id="word"></div>
+  <div class="keys" id="keys"></div>
+</section>
+
+<section id="s-explain" class="card hide">
+  <div class="big">🎉</div>
+  <div class="msg" id="praise"></div>
+  <div class="reveal" id="rword"></div>
+  <div class="info" id="rinfo"></div>
+  <button class="btn" id="b-next">Siguiente ➜</button>
+</section>
+
+<section id="s-over" class="card hide">
+  <div class="big">😢</div>
+  <h1>¡Oh no! Se acabaron tus vidas. ¡Inténtalo nuevamente!</h1>
+  <p style="font-size:20px">La palabra era: <b id="lostword"></b></p>
+  <div class="info" id="lostinfo"></div>
+  <button class="btn" id="b-again">🔄 Volver a jugar</button>
+</section>
+
+<section id="s-win" class="card hide">
+  <div class="deco">🎊 ⭐ 🎊 ⭐ 🎊</div>
+  <div class="medal" id="medal">🏆</div>
+  <h1>¡Felicidades! ¡Has completado El Gran Ahorcado del Lenguaje!</h1>
+  <div class="msg">¡Eres un experto en lenguaje!</div>
+  <p style="font-size:22px;margin:6px">Tu medalla: <b id="medalname"></b></p>
+  <div class="score" id="final"></div>
+  <p style="font-size:18px">Palabras completadas: 10 de 10</p>
+  <button class="btn" id="b-again2">🔄 Jugar otra vez</button>
+</section>
+
+</div>
+<script>
+const WORDS=[
+{w:"FELIZ",clue:"Es como te sientes cuando estás muy contento.",type:"adjetivo",mean:"que siente alegría.",rel:"Sinónimo: contento. Antónimo: triste."},
+{w:"CORRER",clue:"Es lo que haces cuando vas muy rápido con tus piernas.",type:"verbo",mean:"moverse a gran velocidad usando las piernas.",rel:"Sinónimo: trotar. Antónimo: caminar despacio.",tip:"Se escribe con RR en medio."},
+{w:"CUADERNO",clue:"Es donde escribes tus tareas en el colegio.",type:"sustantivo",mean:"conjunto de hojas unidas donde se escribe o dibuja.",rel:"Sinónimo: libreta."},
+{w:"ENORME",clue:"Un elefante es de este tamaño: muy, muy grande.",type:"adjetivo",mean:"muy grande.",rel:"Sinónimo: gigante. Antónimo: diminuto."},
+{w:"ESCRIBIR",clue:"Es lo que haces con un lápiz para formar palabras.",type:"verbo",mean:"dibujar letras o palabras en un papel.",rel:"Sinónimo: redactar.",tip:"¡Ojo! Se escribe con B."},
+{w:"AMISTAD",clue:"Es el cariño especial que sientes por tus mejores amigos.",type:"sustantivo",mean:"cariño y confianza entre las personas.",rel:"Sinónimo: compañerismo. Antónimo: enemistad."},
+{w:"VALIENTE",clue:"Así es quien no se asusta y enfrenta los problemas.",type:"adjetivo",mean:"que enfrenta el peligro o el miedo con valor.",rel:"Sinónimo: audaz. Antónimo: cobarde.",tip:"¡Ojo! Se escribe con V."},
+{w:"BIBLIOTECA",clue:"Es el lugar tranquilo lleno de libros que puedes pedir prestados.",type:"sustantivo",mean:"lugar donde se guardan y se leen libros.",rel:"Sinónimo: librería (de préstamo).",tip:"¡Ojo! Tiene dos B y una C."},
+{w:"BRILLANTE",clue:"Así es una estrella que da mucha luz.",type:"adjetivo",mean:"que despide luz o destaca por su belleza.",rel:"Sinónimo: reluciente. Antónimo: opaco.",tip:"Se escribe con LL."},
+{w:"DESCUBRIR",clue:"Es lo que haces cuando encuentras algo que no sabías que existía.",type:"verbo",mean:"encontrar o conocer algo nuevo.",rel:"Sinónimo: hallar. Antónimo: ocultar.",tip:"Se escribe con B."}
+];
+const LETTERS="ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
+const PRAISE=["¡Muy bien!","¡Excelente trabajo!","¡Eres un experto en lenguaje!","¡Fantástico!","¡Genial!"];
+const RETRY=["¡Sigue intentando!","¡Tú puedes!","¡Casi lo logras!"];
+const $=id=>document.getElementById(id);
+let i,lives,score,guessed,done;
+
+function show(id){["s-start","s-game","s-explain","s-over","s-win"].forEach(s=>$(s).classList.toggle("hide",s!==id));window.scrollTo(0,0)}
+function startGame(){i=0;score=0;loadRound();}
+function loadRound(){
+  lives=3;guessed=new Set();done=false;
+  const r=WORDS[i];
+  $("lvl").textContent="Palabra "+(i+1)+" de "+WORDS.length;
+  $("pts").textContent="⭐ "+score;
+  $("prog").style.width=(i/WORDS.length*100)+"%";
+  $("clue").textContent="💡 Pista: "+r.clue+" ("+r.w.length+" letras)";
+  $("msg").textContent="¡Elige una letra!";
+  $("mas").textContent="📖";
+  const k=$("keys");k.innerHTML="";
+  LETTERS.forEach(L=>{const b=document.createElement("button");b.textContent=L;b.dataset.l=L;b.onclick=()=>pick(L);k.appendChild(b)});
+  draw();show("s-game");
+}
+function draw(){
+  const r=WORDS[i];
+  $("hearts").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+  $("word").innerHTML=r.w.split("").map(c=>"<span>"+(guessed.has(c)?c:"")+"</span>").join("");
+}
+function pick(L){
+  if(done||guessed.has(L))return;
+  guessed.add(L);
+  const r=WORDS[i],b=document.querySelector('[data-l="'+L+'"]');
+  b.disabled=true;
+  if(r.w.includes(L)){
+    b.classList.add("ok");$("mas").textContent="😄";$("msg").textContent="¡Muy bien! La letra "+L+" está en la palabra.";
+    draw();
+    if(r.w.split("").every(c=>guessed.has(c))){done=true;score+=100+lives*10;setTimeout(()=>explain(true),700)}
+  }else{
+    b.classList.add("no");lives--;$("mas").textContent="😟";
+    $("msg").textContent=RETRY[Math.floor(Math.random()*RETRY.length)];
+    $("word").classList.remove("shake");void $("word").offsetWidth;$("word").classList.add("shake");
+    draw();
+    if(lives===0){done=true;setTimeout(()=>explain(false),800)}
+  }
+  $("pts").textContent="⭐ "+score;
+}
+function infoHTML(r){
+  return "<p>📘 <b>"+r.w.charAt(0)+r.w.slice(1).toLowerCase()+"</b> es un <b>"+r.type+"</b>.</p><p>🔎 Significa: "+r.mean+"</p><p>🔁 "+r.rel+"</p>"+(r.tip?"<p>✍️ "+r.tip+"</p>":"");
+}
+function explain(won){
+  const r=WORDS[i];
+  if(!won){
+    $("lostword").textContent=r.w;$("lostinfo").innerHTML=infoHTML(r);show("s-over");return;
+  }
+  $("praise").textContent=PRAISE[Math.floor(Math.random()*PRAISE.length)];
+  $("rword").textContent=r.w;$("rinfo").innerHTML=infoHTML(r);
+  $("b-next").textContent=i===WORDS.length-1?"¡Ver mi premio! 🏆":"Siguiente ➜";
+  show("s-explain");
+}
+function next(){
+  i++;
+  if(i>=WORDS.length)return win();
+  loadRound();
+}
+function win(){
+  const max=WORDS.length*130;
+  let m="🥉",n="Medalla de Bronce";
+  if(score>=max*.85){m="🏆";n="Gran Trofeo de Oro"}
+  else if(score>=max*.7){m="🥇";n="Medalla de Oro"}
+  else if(score>=max*.55){m="🥈";n="Medalla de Plata"}
+  $("medal").textContent=m;$("medalname").textContent=n;
+  $("final").textContent="⭐ "+score+" puntos de "+max;
+  show("s-win");
+}
+$("b-start").onclick=startGame;
+$("b-next").onclick=next;
+$("b-again").onclick=startGame;
+$("b-again2").onclick=startGame;
+document.addEventListener("keydown",e=>{
+  if($("s-game").classList.contains("hide"))return;
+  const L=e.key.toUpperCase();
+  if(LETTERS.includes(L))pick(L);
+});
+</script>
+</body>
+</html>
